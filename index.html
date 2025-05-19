@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ESMA Name-Change Sankey (Asset Manager Selector)</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://unpkg.com/d3-sankey@0.12.3"></script>
+  <style>
+    body {
+      font-family: Verdana, sans-serif;
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column;
+      align-items: center; height: 100vh;
+    }
+    #controls {
+      margin: 10px;
+    }
+    .link { fill: none; stroke-opacity: 0.5; transition: stroke-opacity 0.2s; }
+    .link.highlight { stroke-opacity: 0.9; }
+    .dimmed .link:not(.highlight) { stroke-opacity: 0.3; }
+    .node rect { opacity: 0.6; transition: opacity 0.2s; }
+    .node.highlight rect { opacity: 1 !important; }
+    .dimmed .node rect:not(.highlight) { opacity: 0.3; }
+    .tooltip {
+      position: absolute; background: lightgrey;
+      padding: 6px; border-radius: 4px;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.2s;
+    }
+    #chart { flex: 1; width: 100%; }
+    svg { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+
+  <div id="controls">
+    <label for="amSelect">Asset Manager:</label>
+    <select id="amSelect">
+      <option value="all" selected>All Asset Managers</option>
+      <option value="test">Test Asset Manager</option>
+    </select>
+  </div>
+
+  <div id="chart"></div>
+  <div class="tooltip" id="tooltip"></div>
+
+  <script>
+    // dimensions
+    const margin = { top: 40, right: 20, bottom: 40, left: 20 };
+    const fullW = 800, fullH = 500;
+    const width  = fullW  - margin.left - margin.right;
+    const height = fullH  - margin.top  - margin.bottom;
+
+    // desired vertical order
+    const order = [
+      "sustainable",
+      "environment",
+      "transition",
+      "impact",
+      "social",
+      "governance",
+      "watchlist term",
+      "Neuer Begriff nicht ESMA-relevant",
+      "Begriff entfernt"
+    ];
+
+    // sankey generator
+    const sankey = d3.sankey()
+      .nodeWidth(20)
+      .nodePadding(10)
+      .extent([[1,1],[width-1,height-1]])
+      .nodeAlign(d3.sankeyJustify)
+      .nodeSort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
+
+    // SVG setup
+    const svg = d3.select("#chart")
+      .append("svg")
+        .attr("viewBox", `0 0 ${fullW} ${fullH}`)
+        .attr("preserveAspectRatio", "xMinYMin meet")
+      .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+    const tooltip = d3.select("#tooltip");
+    const fmt = d3.format(",");
+
+    function loadChart(prefix) {
+      // clear previous
+      svg.selectAll("*").remove();
+
+      Promise.all([
+        d3.csv(`${prefix}_nodes.csv`),
+        d3.csv(`${prefix}_links.csv`)
+      ]).then(([nodesRaw, linksRaw]) => {
+        const N = nodesRaw.length;
+
+        // duplicate nodes left/right
+        const sankeyNodes = nodesRaw
+          .map(d => ({ name: d.kategorie.trim(), color: d.color, col: "L" }))
+          .concat(
+            nodesRaw.map(d => ({ name: d.kategorie.trim(), color: d.color, col: "R" }))
+          );
+
+        // build links
+        const sankeyLinks = linksRaw
+          .map(d => {
+            const s = nodesRaw.findIndex(n => n.kategorie.trim() === d.source_kategorie.trim());
+            const t = nodesRaw.findIndex(n => n.kategorie.trim() === d.target_kategorie.trim());
+            return (s<0||t<0) ? null : { source: s, target: N + t, value: +d.value };
+          })
+          .filter(d => d);
+
+        // layout
+        const { nodes: Gnodes, links: Glinks } = sankey({
+          nodes: sankeyNodes,
+          links: sankeyLinks
+        });
+
+        // gradients
+        const defs = svg.append("defs");
+        Glinks.forEach((link,i) => {
+          const grad = defs.append("linearGradient")
+            .attr("id", `grad${i}`)
+            .attr("gradientUnits", "userSpaceOnUse")
+            .attr("x1", link.source.x1)
+            .attr("x2", link.target.x0);
+          grad.append("stop")
+            .attr("offset","0%")
+            .attr("stop-color", sankeyNodes[link.source.index].color);
+          grad.append("stop")
+            .attr("offset","100%")
+            .attr("stop-color", sankeyNodes[link.target.index].color);
+        });
+
+        // draw links
+        svg.append("g")
+          .selectAll("path")
+          .data(Glinks)
+          .enter().append("path")
+            .attr("class","link")
+            .attr("d", d3.sankeyLinkHorizontal())
+            .attr("stroke-width", d=>Math.max(1,d.width))
+            .attr("stroke",(d,i)=>`url(#grad${i})`)
+            .on("mouseover",(e,d)=>{
+              svg.classed("dimmed",true);
+              d3.select(e.currentTarget).classed("highlight",true);
+              tooltip.style("opacity",1)
+                .html(`${fmt(Math.round(d.value))}`)
+                .style("left",`${e.pageX+6}px`)
+                .style("top",`${e.pageY-6}px`);
+            })
+            .on("mousemove",e=>{
+              tooltip.style("left",`${e.pageX+6}px`)
+                     .style("top",`${e.pageY-6}px`);
+            })
+            .on("mouseout",()=>{
+              svg.classed("dimmed",false);
+              d3.selectAll(".link").classed("highlight",false);
+              tooltip.style("opacity",0);
+            });
+
+        // draw only nodes with flow
+        const visibleNodes = Gnodes.filter(d => d.value > 0);
+
+        const node = svg.append("g")
+          .selectAll("g")
+          .data(visibleNodes)
+          .enter().append("g")
+            .attr("transform", d => `translate(${d.x0},${d.y0})`)
+            .on("mouseover",(e,d)=>{
+              svg.classed("dimmed",true);
+              d3.select(e.currentTarget).classed("highlight",true);
+              tooltip.style("opacity",1)
+                .html(d.name)
+                .style("left",`${e.pageX+6}px`)
+                .style("top",`${e.pageY-6}px`);
+            })
+            .on("mousemove",e=>{
+              tooltip.style("left",`${e.pageX+6}px`)
+                     .style("top",`${e.pageY-6}px`);
+            })
+            .on("mouseout",()=>{
+              svg.classed("dimmed",false);
+              d3.selectAll(".node").classed("highlight",false);
+              tooltip.style("opacity",0);
+            });
+
+        node.append("rect")
+          .attr("width", sankey.nodeWidth())
+          .attr("height", d=>d.y1-d.y0)
+          .attr("fill", d=>d.color);
+
+        node.append("text")
+          .attr("x", d=> d.col==="L" ? sankey.nodeWidth()+6 : -6)
+          .attr("y", d=> (d.y1-d.y0)/2)
+          .attr("dy","0.35em")
+          .attr("text-anchor", d=> d.col==="L" ? "start" : "end")
+          .style("font-size","12px")
+          .text(d=>d.name);
+
+      })
+      .catch(err => console.error("Failed to load CSVs or build sankey:", err));
+    }
+
+    // wire up dropdown & initial draw
+    d3.select("#amSelect").on("change", function() {
+      loadChart(this.value);
+    });
+    loadChart("all");
+  </script>
+</body>
+</html>
