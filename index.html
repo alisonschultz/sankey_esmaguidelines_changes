@@ -69,8 +69,8 @@
       .nodeWidth(20)
       .nodePadding(10)
       .extent([[1,1],[width-1,height-1]])
-      .nodeAlign(d3.sankeyJustify)
-      .nodeSort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
+      .nodeAlign(d3.sankeyCenter)  // Vertikale Ausrichtung
+      .nodeSort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));  // Sortierung nach 'order'
 
     // SVG setup
     const svg = d3.select("#chart")
@@ -86,10 +86,7 @@
       // clear previous
       svg.selectAll("*").remove();
 
-      Promise.all([
-        d3.csv(`${prefix}_nodes.csv`),
-        d3.csv(`${prefix}_links.csv`)
-      ]).then(([nodesRaw, linksRaw]) => {
+      Promise.all([d3.csv(`${prefix}_nodes.csv`), d3.csv(`${prefix}_links.csv`)]).then(([nodesRaw, linksRaw]) => {
         const N = nodesRaw.length;
 
         // duplicate nodes left/right
