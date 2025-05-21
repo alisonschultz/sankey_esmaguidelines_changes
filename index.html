@@ -12,9 +12,7 @@
       display: flex; flex-direction: column;
       align-items: center; height: 100vh;
     }
-    #controls {
-      margin: 10px;
-    }
+    #controls { margin: 10px; }
     .link { fill: none; stroke-opacity: 0.5; transition: stroke-opacity 0.2s; }
     .link.highlight { stroke-opacity: 0.9; }
     .dimmed .link:not(.highlight) { stroke-opacity: 0.3; }
@@ -64,14 +62,6 @@
       "Begriff entfernt"
     ];
 
-    // sankey generator
-    const sankey = d3.sankey()
-      .nodeWidth(20)
-      .nodePadding(10)
-      .extent([[1,1],[width-1,height-1]])
-      .nodeAlign(d3.sankeyCenter)  // Vertikale Ausrichtung
-      .nodeSort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));  // Sortierung nach 'order'
-
     // SVG setup
     const svg = d3.select("#chart")
       .append("svg")
@@ -83,10 +73,20 @@
     const fmt = d3.format(",");
 
     function loadChart(prefix) {
-      // clear previous
       svg.selectAll("*").remove();
 
-      Promise.all([d3.csv(`${prefix}_nodes.csv`), d3.csv(`${prefix}_links.csv`)]).then(([nodesRaw, linksRaw]) => {
+      // recreate sankey generator each time to pick up nodeSort
+      const sankeyGen = d3.sankey()
+        .nodeWidth(20)
+        .nodePadding(10)
+        .extent([[1,1],[width-1,height-1]])
+        .nodeAlign(d3.sankeyJustify)
+        .nodeSort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
+
+      Promise.all([
+        d3.csv(`${prefix}_nodes.csv`),
+        d3.csv(`${prefix}_links.csv`)
+      ]).then(([nodesRaw, linksRaw]) => {
         const N = nodesRaw.length;
 
         // duplicate nodes left/right
@@ -105,8 +105,8 @@
           })
           .filter(d => d);
 
-        // layout
-        const { nodes: Gnodes, links: Glinks } = sankey({
+        // compute layout with fresh sankeyGen
+        const { nodes: Gnodes, links: Glinks } = sankeyGen({
           nodes: sankeyNodes,
           links: sankeyLinks
         });
@@ -119,12 +119,10 @@
             .attr("gradientUnits", "userSpaceOnUse")
             .attr("x1", link.source.x1)
             .attr("x2", link.target.x0);
-          grad.append("stop")
-            .attr("offset","0%")
-            .attr("stop-color", sankeyNodes[link.source.index].color);
-          grad.append("stop")
-            .attr("offset","100%")
-            .attr("stop-color", sankeyNodes[link.target.index].color);
+          grad.append("stop").attr("offset","0%")
+              .attr("stop-color", sankeyNodes[link.source.index].color);
+          grad.append("stop").attr("offset","100%")
+              .attr("stop-color", sankeyNodes[link.target.index].color);
         });
 
         // draw links
@@ -181,12 +179,12 @@
             });
 
         node.append("rect")
-          .attr("width", sankey.nodeWidth())
+          .attr("width", sankeyGen.nodeWidth())
           .attr("height", d=>d.y1-d.y0)
           .attr("fill", d=>d.color);
 
         node.append("text")
-          .attr("x", d=> d.col==="L" ? sankey.nodeWidth()+6 : -6)
+          .attr("x", d=> d.col==="L" ? sankeyGen.nodeWidth()+6 : -6)
           .attr("y", d=> (d.y1-d.y0)/2)
           .attr("dy","0.35em")
           .attr("text-anchor", d=> d.col==="L" ? "start" : "end")
