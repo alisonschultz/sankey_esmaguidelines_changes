@@ -1,24 +1,30 @@
 source_kategorie,target_kategorie,value
-environment,Begriff entfernt,62
-environment,Begriff nicht ESMA-relevant,185
-environment,social,1
-environment,sustainable,10
-environment,transition,10
-environment,watchlist term,49
-impact,Begriff nicht ESMA-relevant,1
-social,Begriff entfernt,1
-social,Begriff nicht ESMA-relevant,1
-sustainable,Begriff entfernt,28
-sustainable,Begriff nicht ESMA-relevant,87
-sustainable,environment,53
-sustainable,social,1
-sustainable,transition,4
-sustainable,watchlist term,9
-transition,Begriff entfernt,2
-transition,Begriff nicht ESMA-relevant,7
-transition,environment,13
-watchlist term,Begriff entfernt,3
-watchlist term,Begriff nicht ESMA-relevant,23
-watchlist term,environment,2
-watchlist term,impact,1
-watchlist term,sustainable,1
+environment,keine_kategorie,146
+environment,sustainable,11
+environment,transition,20
+environment,watchlist,163
+impact,environment,2
+impact,keine_kategorie,3
+impact,sustainable,3
+impact,transition,1
+keine_kategorie,environment,30
+keine_kategorie,impact,2
+keine_kategorie,sustainable,27
+keine_kategorie,transition,4
+keine_kategorie,watchlist,11
+social,keine_kategorie,2
+social,sustainable,1
+social,watchlist,1
+sustainable,environment,79
+sustainable,impact,1
+sustainable,keine_kategorie,132
+sustainable,social,2
+sustainable,transition,14
+sustainable,watchlist,19
+transition,environment,21
+transition,keine_kategorie,7
+transition,watchlist,5
+watchlist,environment,2
+watchlist,impact,1
+watchlist,keine_kategorie,13
+watchlist,sustainable,4
