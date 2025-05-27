@@ -1,0 +1,7 @@
+source_kategorie,target_kategorie,value
+environment,transition,1
+environment,watchlist,4
+keine_kategorie,environment,1
+sustainable,keine_kategorie,1
+sustainable,transition,1
+transition,keine_kategorie,1
