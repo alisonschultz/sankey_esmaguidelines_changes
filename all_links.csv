@@ -1,33 +1,33 @@
 source_kategorie,target_kategorie,value
-environment,keine_kategorie,215
+environment,no ESMA term,215
 environment,social,4
 environment,sustainable,13
 environment,transition,25
 environment,watchlist,208
 impact,environment,2
-impact,keine_kategorie,3
+impact,no ESMA term,3
 impact,sustainable,4
-keine_kategorie,environment,28
-keine_kategorie,impact,2
-keine_kategorie,social,1
-keine_kategorie,sustainable,30
-keine_kategorie,transition,5
-keine_kategorie,watchlist,17
-social,keine_kategorie,1
+no ESMA term,environment,28
+no ESMA term,impact,2
+no ESMA term,social,1
+no ESMA term,sustainable,30
+no ESMA term,transition,5
+no ESMA term,watchlist,17
+social,no ESMA term,1
 social,sustainable,1
 social,watchlist,2
 sustainable,environment,104
 sustainable,impact,2
-sustainable,keine_kategorie,173
+sustainable,no ESMA term,173
 sustainable,social,6
 sustainable,transition,16
 sustainable,watchlist,24
 transition,environment,20
-transition,keine_kategorie,7
+transition,no ESMA term,7
 transition,watchlist,5
 watchlist,environment,1
 watchlist,impact,1
-watchlist,keine_kategorie,20
+watchlist,no ESMA term,20
 watchlist,social,1
 watchlist,sustainable,3
 watchlist,transition,1

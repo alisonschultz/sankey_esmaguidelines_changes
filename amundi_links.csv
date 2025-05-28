@@ -1,7 +1,7 @@
 source_kategorie,target_kategorie,value
-environment,keine_kategorie,13
+environment,no ESMA term,13
 environment,watchlist,20
-keine_kategorie,environment,6
-sustainable,keine_kategorie,2
+no ESMA term,environment,6
+sustainable,no ESMA term,2
 transition,environment,7
-watchlist,keine_kategorie,1
+watchlist,no ESMA term,1

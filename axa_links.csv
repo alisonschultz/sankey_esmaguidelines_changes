@@ -1,6 +1,6 @@
 source_kategorie,target_kategorie,value
-environment,keine_kategorie,2
+environment,no ESMA term,2
 impact,environment,1
-keine_kategorie,environment,2
-sustainable,keine_kategorie,1
-watchlist,keine_kategorie,1
+no ESMA term,environment,2
+sustainable,no ESMA term,1
+watchlist,no ESMA term,1

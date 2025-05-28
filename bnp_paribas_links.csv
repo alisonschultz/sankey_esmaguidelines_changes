@@ -1,6 +1,6 @@
 source_kategorie,target_kategorie,value
-environment,keine_kategorie,3
-keine_kategorie,environment,1
-sustainable,keine_kategorie,12
+environment,no ESMA term,3
+no ESMA term,environment,1
+sustainable,no ESMA term,12
 sustainable,social,4
 transition,environment,1
